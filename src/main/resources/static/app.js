@@ -12,6 +12,7 @@
   var API = '/api';
   var DEFAULT_PRESET_DAYS = 30;
   var LATE_LIMIT = 20;
+  var THEME_KEY = 'ops-theme';
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
   // ---------- API client ----------
@@ -122,7 +123,8 @@
       chartOnTime: document.getElementById('chart-on-time'),
       chartTickets: document.getElementById('chart-tickets'),
       lateBody: document.getElementById('late-body'),
-      vendors: document.getElementById('vendors-list')
+      vendors: document.getElementById('vendors-list'),
+      themeToggle: document.getElementById('theme-toggle')
     };
 
     var state = {
@@ -343,6 +345,29 @@
       p.button.addEventListener('click', function () {
         selectPreset(p.days);
       });
+    });
+
+    // ---------- Theme (colours live in style.css; dark unless light was chosen) ----------
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      els.themeToggle.textContent = theme === 'dark' ? 'Light theme' : 'Dark theme';
+    }
+
+    var storage = null;
+    var storedTheme = null;
+    try {
+      storage = document.defaultView.localStorage;
+      storedTheme = storage.getItem(THEME_KEY);
+    } catch (e) { /* storage blocked: the theme just isn't remembered */ }
+    applyTheme(storedTheme === 'light' ? 'light' : 'dark');
+
+    els.themeToggle.addEventListener('click', function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      try {
+        storage.setItem(THEME_KEY, next);
+      } catch (e) { /* as above */ }
     });
 
     var ready = api.health().then(function (health) {
